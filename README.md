@@ -1,13 +1,15 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# spatialsample
+# spatialsample <a href='https://spatialsample.tidymodels.org'><img src='man/figures/logo.png' align="right" height="139" /></a>
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/tidymodels/spatialsample/workflows/R-CMD-check/badge.svg)](https://github.com/tidymodels/spatialsample/actions)
+[![R-CMD-check](https://github.com/tidymodels/spatialsample/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/tidymodels/spatialsample/actions/workflows/R-CMD-check.yaml)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/spatialsample)](https://CRAN.R-project.org/package=spatialsample)
 [![Codecov test
-coverage](https://codecov.io/gh/tidymodels/spatialsample/branch/master/graph/badge.svg)](https://codecov.io/gh/tidymodels/spatialsample?branch=master)
+coverage](https://codecov.io/gh/tidymodels/spatialsample/branch/main/graph/badge.svg)](https://app.codecov.io/gh/tidymodels/spatialsample?branch=main)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 <!-- badges: end -->
@@ -20,8 +22,11 @@ spatial resampling to use with
 
 -   [spatial clustering
     cross-validation](https://doi.org/10.1109/IGARSS.2012.6352393)
-
-The implementation of more spatial resampling approaches is planned.
+-   [spatial block cross-validation](https://doi.org/10.1111/ecog.02881)
+-   [spatially buffered
+    cross-validation](https://doi.org/10.1111/geb.12161)
+-   [leave-location-out
+    cross-validation](https://doi.org/10.1016/j.envsoft.2017.12.001)
 
 Like [rsample](https://rsample.tidymodels.org/), spatialsample provides
 building blocks for creating and analyzing resamples of a spatial data
@@ -47,68 +52,61 @@ devtools::install_github("tidymodels/spatialsample")
 
 ## Example
 
-The most straightforward spatial resampling strategy with the lightest
-dependencies is `spatial_clustering_cv()`, which uses k-means clustering
-to identify cross-validation folds:
+The most straightforward spatial resampling strategy is
+`spatial_clustering_cv()`, which uses k-means clustering to identify
+cross-validation folds:
 
 ``` r
 library(spatialsample)
-data("ames", package = "modeldata")
 
 set.seed(1234)
-folds <- spatial_clustering_cv(ames, coords = c("Latitude", "Longitude"), v = 5)
+folds <- spatial_clustering_cv(boston_canopy, v = 5)
 
 folds
 #> #  5-fold spatial cross-validation 
-#> # A tibble: 5 x 2
-#>   splits             id   
-#>   <list>             <chr>
-#> 1 <split [2332/598]> Fold1
-#> 2 <split [2187/743]> Fold2
-#> 3 <split [2570/360]> Fold3
-#> 4 <split [2118/812]> Fold4
-#> 5 <split [2513/417]> Fold5
+#> # A tibble: 5 × 2
+#>   splits            id   
+#>   <list>            <chr>
+#> 1 <split [600/82]>  Fold1
+#> 2 <split [589/93]>  Fold2
+#> 3 <split [524/158]> Fold3
+#> 4 <split [497/185]> Fold4
+#> 5 <split [518/164]> Fold5
 ```
 
-In this example, the `ames` data on houses in Ames, IA is resampled with
-`v = 5`; notice that the resulting partitions do not contain an equal
-number of observations.
+In this example, the `boston_canopy` data on tree cover in Boston, MA is
+resampled with `v = 5`; notice that the resulting partitions do not
+contain an equal number of observations.
 
-We can create a helper plotting function to visualize the five folds.
+In addition to resampling algorithms, spatialsample provides methods to
+visualize resamples using [ggplot2](https://ggplot2.tidyverse.org/)
+through the `autoplot()` function:
 
 ``` r
-library(ggplot2)
-library(purrr)
-library(dplyr)
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
-
-plot_splits <- function(split) {
-    p <- analysis(split) %>%
-        mutate(analysis = "Analysis") %>%
-        bind_rows(assessment(split) %>%
-                      mutate(analysis = "Assessment")) %>%
-        ggplot(aes(Longitude, Latitude, color = analysis)) + 
-        geom_point(alpha = 0.5) +
-        labs(color = NULL)
-    print(p)
-}
-
-walk(folds$splits, plot_splits)
+autoplot(folds)
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-.gif" width="100%" />
+<img src="man/figures/README-2022-06-12_boston_static-1.png" width="100%" />
+
+We can use the same function to visualize each fold separately:
+
+``` r
+library(purrr)
+
+walk(folds$splits, function(x) print(autoplot(x)))
+```
+
+<img src="man/figures/README-2022-06-12_boston-anim-.gif" width="100%" />
+
+So far, we’ve only scratched the surface of the functionality
+spatialsample provides. For more information, check out the [Getting
+Started](https://spatialsample.tidymodels.org/articles/spatialsample.html)
+documentation!
 
 ## Contributing
 
 This project is released with a [Contributor Code of
-Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).
+Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html).
 By contributing to this project, you agree to abide by its terms.
 
 -   For questions and discussions about tidymodels packages, modeling,

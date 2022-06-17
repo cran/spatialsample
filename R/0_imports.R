@@ -1,7 +1,14 @@
+#' @keywords internal
+"_PACKAGE"
+
+## usethis namespace: start
+## usethis namespace: end
+NULL
+
 #' @importFrom rsample complement new_rset make_splits
 #' @importFrom purrr map
 #' @importFrom rlang is_empty
-#' @importFrom stats kmeans
+#' @importFrom stats kmeans hclust cutree as.dist dist
 #' @importFrom dplyr dplyr_reconstruct
 #'
 #' @importFrom rsample analysis
@@ -12,5 +19,12 @@ rsample::analysis
 #' @export
 rsample::assessment
 
+#' @importFrom ggplot2 autoplot
+#' @export
+ggplot2::autoplot
+
 #' @import vctrs
+NULL
+
+#' @import sf
 NULL
