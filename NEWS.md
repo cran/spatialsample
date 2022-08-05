@@ -1,3 +1,28 @@
+# spatialsample 0.2.1
+
+* Mike Mahoney is taking over as package maintainer, as Julia Silge (who remains
+  a package author) moves to focus on ModelOps work. 
+
+* Functions will now return rsplits without `out_id`, like most rsample 
+  functions, whenever `buffer` is `NULL`.
+
+* `spatial_block_cv()`, `spatial_buffer_vfold_cv()`, and buffering now support
+  using sf or sfc objects with a missing CRS. The assumption is that data in an
+  NA CRS is projected, with all distance values in the same unit as the 
+  projection. Trying to use alternative units will fail. Set a CRS if these
+  assumptions aren't correct.
+  
+* `spatial_buffer_vfold_cv()` and buffering no longer support tibble or 
+  data.frame inputs (they now require sf or sfc objects). It was not easy to 
+  use these to begin with, but should have always caused an error: use 
+  `rsample::vfold_cv()` instead or transform your data into an sf object.
+
+* `spatial_buffer_vfold_cv()` has had some attribute changes to match `rsample`:
+  * `strata` attribute is now the name of the column used for stratification, 
+     or not set if there was no stratification.
+  * `pool` and `breaks` have been added as attributes
+  * `radius` and `buffer` are now set to 0 if they were passed as `NULL`.
+
 # spatialsample 0.2.0
 
 ## New features

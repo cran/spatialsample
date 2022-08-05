@@ -4,9 +4,9 @@
       spatial_buffer_vfold_cv(ames_sf, buffer = 500, radius = NULL)
     Condition
       Error in `spatial_buffer_vfold_cv()`:
-      ! `buffer` and `radius` can only be used with geographic coordinates when using the s2 geometry library
-      i Reproject your data into a projected coordinate reference system using `sf::st_transform()`
-      i Or install the `s2` package and enable it using `sf::sf_use_s2(TRUE)`
+      ! `spatial_buffer_vfold_cv()` can only process geographic coordinates when using the s2 geometry library.
+      i Reproject your data into a projected coordinate reference system using `sf::st_transform()`.
+      i Or install the `s2` package and enable it using `sf::sf_use_s2(TRUE)`.
 
 ---
 
@@ -14,53 +14,44 @@
       suppressMessages(spatial_leave_location_out_cv(ames_sf, Neighborhood, buffer = 500))
     Condition
       Error in `spatial_leave_location_out_cv()`:
-      ! `buffer` and `radius` can only be used with geographic coordinates when using the s2 geometry library
-      i Reproject your data into a projected coordinate reference system using `sf::st_transform()`
-      i Or install the `s2` package and enable it using `sf::sf_use_s2(TRUE)`
+      ! Buffering can only process geographic coordinates when using the s2 geometry library.
+      i Reproject your data into a projected coordinate reference system using `sf::st_transform()`.
+      i Or install the `s2` package and enable it using `sf::sf_use_s2(TRUE)`.
 
 # bad args
 
     Code
-      spatial_buffer_vfold_cv(ames, buffer = 500, radius = NULL)
+      spatial_buffer_vfold_cv(ames_sf, radius = NULL)
     Condition
       Error in `spatial_buffer_vfold_cv()`:
-      ! `buffer` and `radius` require `data` to have a non-NA coordinate reference system
-      i Set the CRS for your data using `sf::st_set_crs()`
+      ! `spatial_buffer_vfold_cv()` requires both `radius` and `buffer` be provided.
+      i Use `NULL` for resampling without one of `radius` or `buffer`, like `radius = NULL, buffer = 5000`.
 
 ---
 
     Code
-      spatial_buffer_vfold_cv(ames, radius = NULL)
+      spatial_buffer_vfold_cv(ames_sf, buffer = 500)
     Condition
       Error in `spatial_buffer_vfold_cv()`:
-      ! `spatial_buffer_vfold_cv()` requires both `radius` and `buffer` be provided
-      i Use `NULL` for resampling without one of `radius` or `buffer`, like `radius = NULL, buffer = 5000`
+      ! `spatial_buffer_vfold_cv()` requires both `radius` and `buffer` be provided.
+      i Use `NULL` for resampling without one of `radius` or `buffer`, like `radius = NULL, buffer = 5000`.
 
 ---
 
     Code
-      spatial_buffer_vfold_cv(ames, buffer = 500)
+      spatial_buffer_vfold_cv(ames_sf)
     Condition
       Error in `spatial_buffer_vfold_cv()`:
-      ! `spatial_buffer_vfold_cv()` requires both `radius` and `buffer` be provided
-      i Use `NULL` for resampling without one of `radius` or `buffer`, like `radius = NULL, buffer = 5000`
-
----
-
-    Code
-      spatial_buffer_vfold_cv(ames)
-    Condition
-      Error in `spatial_buffer_vfold_cv()`:
-      ! `spatial_buffer_vfold_cv()` requires both `radius` and `buffer` be provided
-      i Use `NULL` for resampling without one of `radius` or `buffer`, like `radius = NULL, buffer = 5000`
-      i Or use `rsample::vfold_cv() to use a non-spatial V-fold
+      ! `spatial_buffer_vfold_cv()` requires both `radius` and `buffer` be provided.
+      i Use `NULL` for resampling without one of `radius` or `buffer`, like `radius = NULL, buffer = 5000`.
+      i Or use `rsample::vfold_cv() to use a non-spatial V-fold.
 
 ---
 
     Code
       spatial_leave_location_out_cv(ames)
     Condition
-      Error:
+      Error in `rsample::group_vfold_cv()`:
       ! `group` should be a single character value for the column that will be used for splitting.
 
 ---
@@ -69,15 +60,15 @@
       spatial_leave_location_out_cv(ames, Neighborhood, buffer = 500)
     Condition
       Error in `spatial_leave_location_out_cv()`:
-      ! `buffer` and `radius` require `data` to have a non-NA coordinate reference system
-      i Set the CRS for your data using `sf::st_set_crs()`
+      ! Buffering currently only supports `sf` objects.
+      i Try converting `data` to an `sf` object via `sf::st_as_sf()`.
 
 ---
 
     Code
       spatial_leave_location_out_cv(ames_sf, v = c(5, 10))
     Condition
-      Error:
+      Error in `rsample::group_vfold_cv()`:
       ! `group` should be a single character value for the column that will be used for splitting.
 
 ---
@@ -112,6 +103,7 @@
        9 <split [2779/151]> Fold09
       10 <split [2748/182]> Fold10
       # ... with 18 more rows
+      # i Use `print(n = ...)` to see more rows
 
 ---
 
@@ -137,6 +129,7 @@
        9 <split [681/1]> Fold009
       10 <split [681/1]> Fold010
       # ... with 672 more rows
+      # i Use `print(n = ...)` to see more rows
 
 # printing
 

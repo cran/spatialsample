@@ -29,7 +29,7 @@
 #'
 #' boston_block <- spatial_block_cv(boston_canopy, v = 2)
 #' autoplot(boston_block)
-#' lapply(boston_block$splits, autoplot)
+#' autoplot(boston_block$splits[[1]])
 #'
 #' @rdname autoplot.spatial_rset
 # registered in zzz.R
@@ -95,7 +95,7 @@ autoplot.spatial_block_cv <- function(object, show_grid = TRUE, ..., alpha = 0.6
   data <- object$splits[[1]]$data
 
   plot_data <- data
-  if (sf::st_is_longlat(data)) {
+  if (is_longlat(data)) {
     plot_data <- sf::st_bbox(data)
     plot_data <- expand_grid(plot_data)
     plot_data <- sf::st_as_sfc(plot_data)

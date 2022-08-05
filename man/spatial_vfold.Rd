@@ -37,7 +37,8 @@ applied.}
 test set (after \code{radius} is applied) will be assigned to neither the analysis
 or assessment set. If \code{NULL}, no buffer is applied.}
 
-\item{v}{The number of partitions of the data set.}
+\item{v}{The number of partitions for the resampling. Set to \code{NULL} or \code{Inf}
+for the maximum sensible value (for leave-one-X-out cross-validation).}
 
 \item{repeats}{The number of times to repeat the V-fold partitioning.}
 
@@ -80,11 +81,20 @@ is equivalent to \code{\link[rsample:group_vfold_cv]{rsample::group_vfold_cv()}}
 }
 \examples{
 \dontshow{if (sf::sf_use_s2() && rlang::is_installed("modeldata")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-boston_vfold <- spatial_buffer_vfold_cv(
-  boston_canopy,
+
+data(Smithsonian, package = "modeldata")
+Smithsonian_sf <- sf::st_as_sf(
+  Smithsonian,
+  coords = c("longitude", "latitude"),
+  crs = 4326
+)
+
+spatial_buffer_vfold_cv(
+  Smithsonian_sf,
   buffer = 500,
   radius = NULL
 )
+
 data(ames, package = "modeldata")
 ames_sf <- sf::st_as_sf(ames, coords = c("Longitude", "Latitude"), crs = 4326)
 ames_neighborhoods <- spatial_leave_location_out_cv(ames_sf, Neighborhood)

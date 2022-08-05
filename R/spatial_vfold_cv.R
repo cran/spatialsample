@@ -16,6 +16,7 @@
 #' is equivalent to [rsample::vfold_cv()] and `spatial_leave_location_out_cv`
 #' is equivalent to [rsample::group_vfold_cv()].
 #'
+#' @inheritParams check_v
 #' @inheritParams rsample::vfold_cv
 #' @inheritParams rsample::group_vfold_cv
 #' @param group A variable in data (single character or name) used to create
@@ -41,11 +42,20 @@
 #' @rdname spatial_vfold
 #'
 #' @examplesIf sf::sf_use_s2() && rlang::is_installed("modeldata")
-#' boston_vfold <- spatial_buffer_vfold_cv(
-#'   boston_canopy,
+#'
+#' data(Smithsonian, package = "modeldata")
+#' Smithsonian_sf <- sf::st_as_sf(
+#'   Smithsonian,
+#'   coords = c("longitude", "latitude"),
+#'   crs = 4326
+#' )
+#'
+#' spatial_buffer_vfold_cv(
+#'   Smithsonian_sf,
 #'   buffer = 500,
 #'   radius = NULL
 #' )
+#'
 #' data(ames, package = "modeldata")
 #' ames_sf <- sf::st_as_sf(ames, coords = c("Longitude", "Latitude"), crs = 4326)
 #' ames_neighborhoods <- spatial_leave_location_out_cv(ames_sf, Neighborhood)
@@ -61,18 +71,19 @@ spatial_buffer_vfold_cv <- function(data,
                                     pool = 0.1,
                                     ...) {
 
+  standard_checks(data, "`spatial_buffer_vfold_cv()`")
+
   if (missing(radius) || missing(buffer)) {
     use_vfold <- NULL
     if (missing(radius) && missing(buffer)) {
-      use_vfold <- c(i = "Or use `rsample::vfold_cv() to use a non-spatial V-fold")
+      use_vfold <- c(i = "Or use `rsample::vfold_cv() to use a non-spatial V-fold.")
     }
     rlang::abort(
       c(
-        "`spatial_buffer_vfold_cv()` requires both `radius` and `buffer` be provided",
-        i = "Use `NULL` for resampling without one of `radius` or `buffer`, like `radius = NULL, buffer = 5000`",
+        "`spatial_buffer_vfold_cv()` requires both `radius` and `buffer` be provided.",
+        i = "Use `NULL` for resampling without one of `radius` or `buffer`, like `radius = NULL, buffer = 5000`.",
         use_vfold
       )
-
     )
   }
 
@@ -89,11 +100,21 @@ spatial_buffer_vfold_cv <- function(data,
     ...
   )
 
+  if (!missing(strata)) {
+    strata <- tidyselect::vars_select(names(data), {{ strata }})
+    if (length(strata) == 0) strata <- NULL
+  }
+
+  if (!is.null(strata)) names(strata) <- NULL
   cv_att <- list(v = v,
                  repeats = repeats,
-                 strata = !is.null(strata),
-                 radius = radius,
-                 buffer = buffer)
+                 strata  = strata,
+                 breaks  = breaks,
+                 pool    = pool,
+                 # Set radius and buffer to 0 if NULL or negative
+                 # This enables rsample::reshuffle_rset to work
+                 radius  = min(c(radius, 0)),
+                 buffer  = min(c(buffer, 0)))
 
   if ("sf" %in% class(data)) {
     rset_class <- c("spatial_buffer_vfold_cv", "spatial_rset", "rset")
@@ -212,6 +233,8 @@ posthoc_buffer_rset <- function(data,
     id = names0(length(split_objs), "Fold"),
     v = v
   )
+
+  split_objs$splits <- map(split_objs$splits, rm_out, buffer = buffer)
 
   new_rset(
     splits = split_objs$splits,

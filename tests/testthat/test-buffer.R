@@ -171,10 +171,6 @@ test_that("bad args", {
     ames,
     coords = c("Longitude", "Latitude")
   )
-  expect_snapshot(
-    spatial_clustering_cv(ames_sf, buffer = 50),
-    error = TRUE
-  )
   ames_sf <- sf::st_set_crs(
     ames_sf,
     4326
@@ -186,6 +182,16 @@ test_that("bad args", {
     error = TRUE
   )
   sf::sf_use_s2(s2_status)
+
+  # The default RNG changed in 3.6.0
+  skip_if_not(getRversion() >= numeric_version("3.6.0"))
+
+  skip_if_not(sf::sf_use_s2())
+
+  set.seed(123)
+  expect_snapshot(
+    spatial_clustering_cv(ames_sf, buffer = 0.01)
+  )
 })
 
 ames_sf <- sf::st_as_sf(
@@ -213,8 +219,12 @@ test_that("using buffers", {
     buffer = 0
   )
 
+  # These should be the only changes between 0 and NULL:
   attr(rs2, "radius") <- NULL
   attr(rs2, "buffer") <- NULL
+  attr(rs2, "fingerprint") <- attr(rs1, "fingerprint")
+  rs2$splits <- map(rs2$splits, rm_out)
+
   expect_identical(rs1, rs2)
 
   set.seed(11)
