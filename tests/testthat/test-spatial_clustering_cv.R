@@ -10,126 +10,13 @@ Smithsonian_sf <- sf::st_as_sf(
   crs = 4326
 )
 
-test_that("using kmeans", {
-  set.seed(11)
-  rs1 <- spatial_clustering_cv(
-    Smithsonian,
-    coords = c(latitude, longitude),
-    v = 2
-  )
-  set.seed(11)
-  rs2 <- spatial_clustering_cv(
-    Smithsonian,
-    coords = c(latitude, longitude),
-    v = 2,
-    cluster_function = "kmeans"
-  )
-  expect_identical(rs1, rs2)
-  sizes1 <- dim_rset(rs1)
-
-  expect_true(all(sizes1$analysis + sizes1$assessment == 20))
-  same_data <- map_lgl(
-    rs1$splits,
-    function(x) {
-      isTRUE(all.equal(x$data, Smithsonian))
-    }
-  )
-  expect_true(all(same_data))
-
-  good_holdout <- map_lgl(
-    rs1$splits,
-    function(x) {
-      length(intersect(x$in_ind, x$out_id)) == 0
-    }
-  )
-  expect_true(all(good_holdout))
-})
-
-
-test_that("using hclust", {
-  set.seed(11)
-  rs1 <- spatial_clustering_cv(
-    Smithsonian,
-    coords = c(latitude, longitude),
-    v = 2,
-    cluster_function = "hclust"
-  )
-  sizes1 <- dim_rset(rs1)
-
-  expect_true(all(sizes1$analysis + sizes1$assessment == 20))
-  same_data <- map_lgl(
-    rs1$splits,
-    function(x) {
-      isTRUE(all.equal(x$data, Smithsonian))
-    }
-  )
-  expect_true(all(same_data))
-
-  good_holdout <- map_lgl(
-    rs1$splits,
-    function(x) {
-      length(intersect(x$in_ind, x$out_id)) == 0
-    }
-  )
-  expect_true(all(good_holdout))
-})
-
-
-test_that("bad args", {
-  expect_error(spatial_clustering_cv(Smithsonian, coords = NULL))
-  expect_error(
-    spatial_clustering_cv(Smithsonian, coords = c(Species, Sepal.Width))
-  )
-  expect_snapshot(
-    spatial_clustering_cv(
-      Smithsonian,
-      coords = c(latitude, longitude),
-      v = "a"
-    ),
-    error = TRUE
-  )
-  expect_snapshot(
-    spatial_clustering_cv(
-      Smithsonian,
-      coords = c(latitude, longitude),
-      v = c(5, 10)
-    ),
-    error = TRUE
-  )
-  expect_snapshot(
-    spatial_clustering_cv(
-      Smithsonian,
-      coords = c(latitude, longitude),
-      v = 100
-    ),
-    error = TRUE
-  )
-
-  expect_snapshot(
-    spatial_clustering_cv(Smithsonian, name),
-    error = TRUE
-  )
-
-})
-
-test_that("can pass the dots to kmeans", {
-  expect_error(
-    spatial_clustering_cv(
-      Smithsonian,
-      coords = c(latitude, longitude),
-      v = 2,
-      algorithm = "MacQueen"
-    ),
-    NA
-  )
-})
-
-test_that("using sf", {
-
+test_that("repeats", {
+  skip_if_not(sf::sf_use_s2())
   set.seed(11)
   rs1 <- spatial_clustering_cv(
     Smithsonian_sf,
-    v = 2
+    v = 2,
+    repeats = 2
   )
   sizes1 <- dim_rset(rs1)
 
@@ -149,13 +36,110 @@ test_that("using sf", {
     }
   )
   expect_true(all(good_holdout))
+})
 
-  # This tests to ensure that _our_ warning happens on all platforms:
-  set.seed(123)
-  expect_warning(
-    spatial_clustering_cv(Smithsonian_sf, coords = c(latitude, longitude)),
-    "`coords` is ignored when providing `sf` objects to `data`."
+test_that("using hclust", {
+  skip_if_not(sf::sf_use_s2())
+  set.seed(11)
+  rs1 <- spatial_clustering_cv(
+    Smithsonian_sf,
+    v = 2,
+    cluster_function = "hclust"
   )
+  sizes1 <- dim_rset(rs1)
+
+  expect_true(all(sizes1$analysis + sizes1$assessment == 20))
+  same_data <- map_lgl(
+    rs1$splits,
+    function(x) {
+      isTRUE(all.equal(x$data, Smithsonian_sf))
+    }
+  )
+  expect_true(all(same_data))
+
+  good_holdout <- map_lgl(
+    rs1$splits,
+    function(x) {
+      length(intersect(x$in_ind, x$out_id)) == 0
+    }
+  )
+  expect_true(all(good_holdout))
+})
+
+
+test_that("bad args", {
+  expect_snapshot(
+    spatial_clustering_cv(Smithsonian),
+    error = TRUE
+  )
+  expect_snapshot(
+    spatial_clustering_cv(
+      Smithsonian_sf,
+      v = "a"
+    ),
+    error = TRUE
+  )
+  expect_snapshot(
+    spatial_clustering_cv(
+      Smithsonian_sf,
+      v = c(5, 10)
+    ),
+    error = TRUE
+  )
+  expect_snapshot(
+    spatial_clustering_cv(
+      Smithsonian_sf,
+      v = 100
+    ),
+    error = TRUE
+  )
+})
+
+test_that("can pass the dots to kmeans", {
+  skip_if_not(sf::sf_use_s2())
+  expect_error(
+    spatial_clustering_cv(
+      Smithsonian_sf,
+      v = 2,
+      algorithm = "MacQueen"
+    ),
+    NA
+  )
+})
+
+test_that("using sf", {
+  skip_if_not(sf::sf_use_s2())
+  set.seed(11)
+  rs1 <- spatial_clustering_cv(
+    Smithsonian_sf,
+    v = 2
+  )
+  sizes1 <- dim_rset(rs1)
+
+  set.seed(11)
+  rs2 <- spatial_clustering_cv(
+    Smithsonian_sf,
+    v = 2,
+    cluster_function = "kmeans"
+  )
+  expect_identical(rs1, rs2)
+
+  expect_true(all(sizes1$analysis + sizes1$assessment == 20))
+  same_data <- map_lgl(
+    rs1$splits,
+    function(x) {
+      isTRUE(all.equal(x$data, Smithsonian_sf))
+    }
+  )
+  expect_true(all(same_data))
+
+  good_holdout <- map_lgl(
+    rs1$splits,
+    function(x) {
+      length(intersect(x$in_ind, x$out_id)) == 0
+    }
+  )
+  expect_true(all(good_holdout))
 
   # This tests to ensure that _other_ warnings don't fire on _most_ platforms
   # The default RNG changed in 3.6.0 (skips oldrel-4)
@@ -166,11 +150,12 @@ test_that("using sf", {
   skip_if_not(sf::sf_use_s2())
   set.seed(123)
   expect_snapshot(
-    spatial_clustering_cv(Smithsonian_sf, coords = c(latitude, longitude))
+    spatial_clustering_cv(Smithsonian_sf)
   )
 })
 
 test_that("using custom functions", {
+  skip_if_not(sf::sf_use_s2())
   custom_cluster <- function(dists, v, ...) {
     clusters <- kmeans(dists, centers = v, ...)
     letters[clusters$cluster]
@@ -178,29 +163,16 @@ test_that("using custom functions", {
 
   set.seed(11)
   rs1 <- spatial_clustering_cv(
-    Smithsonian,
-    coords = c(latitude, longitude),
+    Smithsonian_sf,
     v = 2
   )
   set.seed(11)
   rs2 <- spatial_clustering_cv(
-    Smithsonian,
-    coords = c(latitude, longitude),
+    Smithsonian_sf,
     v = 2,
     cluster_function = custom_cluster
   )
-  expect_identical(rs1, rs2)
-
-  expect_error(
-    spatial_clustering_cv(
-      Smithsonian,
-      coords = c(latitude, longitude),
-      v = 2,
-      cluster_function = custom_cluster,
-      algorithm = "MacQueen"
-    ),
-    NA
-  )
+  expect_identical(rs1$splits, rs2$splits)
 
   expect_error(
     spatial_clustering_cv(
@@ -214,6 +186,7 @@ test_that("using custom functions", {
 })
 
 test_that("polygons are only assigned one fold", {
+  skip_if_not(sf::sf_use_s2())
   set.seed(11)
 
   rs1 <- spatial_clustering_cv(boston_canopy, cluster_function = "hclust")
@@ -243,19 +216,21 @@ test_that("polygons are only assigned one fold", {
 })
 
 test_that("printing", {
+  skip_if_not(sf::sf_use_s2())
   # The default RNG changed in 3.6.0
   skip_if_not(getRversion() >= numeric_version("3.6.0"))
   set.seed(123)
   expect_snapshot_output(
-    spatial_clustering_cv(Smithsonian,
-      coords = c(latitude, longitude),
+    spatial_clustering_cv(
+      Smithsonian_sf,
       v = 2
     )
   )
 })
 
 test_that("rsplit labels", {
-  rs <- spatial_clustering_cv(Smithsonian, coords = c(latitude, longitude), v = 2)
+  skip_if_not(sf::sf_use_s2())
+  rs <- spatial_clustering_cv(Smithsonian_sf, v = 2)
   all_labs <- map_df(rs$splits, labels)
   original_id <- rs[, grepl("^id", names(rs))]
   expect_equal(all_labs, original_id)

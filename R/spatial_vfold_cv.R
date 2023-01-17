@@ -89,6 +89,15 @@ spatial_buffer_vfold_cv <- function(data,
 
   n <- nrow(data)
   v <- check_v(v, n, "rows")
+  if (v == n && repeats > 1) {
+    rlang::abort(
+      c(
+        "Repeated cross-validation doesn't make sense when performing leave-one-out cross-validation.",
+        i = "Set `v` to a lower value.",
+        i = "Or set `repeats = 1`."
+      )
+    )
+  }
 
   rset <- rsample::vfold_cv(
     data = data,
@@ -113,8 +122,8 @@ spatial_buffer_vfold_cv <- function(data,
                  pool    = pool,
                  # Set radius and buffer to 0 if NULL or negative
                  # This enables rsample::reshuffle_rset to work
-                 radius  = min(c(radius, 0)),
-                 buffer  = min(c(buffer, 0)))
+                 radius  = max(c(radius, 0)),
+                 buffer  = max(c(buffer, 0)))
 
   if ("sf" %in% class(data)) {
     rset_class <- c("spatial_buffer_vfold_cv", "spatial_rset", "rset")
@@ -147,7 +156,8 @@ spatial_leave_location_out_cv <- function(data,
                                           v = NULL,
                                           radius = NULL,
                                           buffer = NULL,
-                                          ...) {
+                                          ...,
+                                          repeats = 1) {
 
   if (!missing(group)) {
     group <- tidyselect::eval_select(rlang::enquo(group), data)
@@ -158,14 +168,23 @@ spatial_leave_location_out_cv <- function(data,
   } else {
     if (is.null(v)) v <- length(unique(data[[group]]))
     v <- check_v(v, length(unique(data[[group]])), "locations")
+    n <- nrow(data)
+    if (v == n && repeats > 1) {
+      rlang::abort(
+        c(
+          "Repeated cross-validation doesn't make sense when performing leave-one-location-out cross-validation.",
+          i = "Set `v` to a lower value.",
+          i = "Or set `repeats = 1`."
+        )
+      )
+    }
   }
-
-  n <- nrow(data)
 
   rset <- rsample::group_vfold_cv(
     data = data,
     v = v,
     group = {{ group }},
+    repeats = {{ repeats }},
     ...
   )
 
@@ -230,7 +249,6 @@ posthoc_buffer_rset <- function(data,
 
   split_objs <- tibble::tibble(
     splits = split_objs,
-    id = names0(length(split_objs), "Fold"),
     v = v
   )
 
@@ -238,7 +256,7 @@ posthoc_buffer_rset <- function(data,
 
   new_rset(
     splits = split_objs$splits,
-    ids = split_objs[, grepl("^id", names(split_objs))],
+    ids = rset[, grepl("^id", names(rset))],
     attrib = cv_att,
     subclass = rset_class
   )
