@@ -37,24 +37,27 @@
 autoplot.spatial_rset <- function(object, ..., alpha = 0.6) {
   bool_id_columns <- grepl("^id", names(object))
   # Not sure how this would ever fire, but just in case:
-  if (sum(bool_id_columns) > 2) rlang::abort(
-    "Cannot automatically plot rsets with more than two 'id' columns."
-  )
+  if (sum(bool_id_columns) > 2) {
+    rlang::abort(
+      "Cannot automatically plot rsets with more than two 'id' columns."
+    )
+  }
   # These are named to not interfere with normal column names
   .fold. <- .facet. <- NULL
 
   object <- if (sum(bool_id_columns) == 1) {
-    purrr::map2_dfr(
+    purrr::map2(
       object$splits,
       object$id,
       ~ cbind(assessment(.x), .fold. = .y)
     )
   } else {
-    purrr::pmap_dfr(
+    purrr::pmap(
       object[grepl("splits", names(object)) | bool_id_columns],
       ~ cbind(assessment(..1), .facet. = ..2, .fold. = ..3)
     )
   }
+  object <- dplyr::bind_rows(object)
 
   p <- ggplot2::ggplot(
     data = object,
@@ -90,8 +93,10 @@ autoplot.spatial_rsplit <- function(object, ..., alpha = 0.6) {
   object$.class.[outs] <- "Assessment"
   object$.class.[is.na(object$.class.)] <- "Buffer"
 
-  p <- ggplot2::ggplot(data = object,
-                       mapping = ggplot2::aes(color = .class., fill = .class.))
+  p <- ggplot2::ggplot(
+    data = object,
+    mapping = ggplot2::aes(color = .class., fill = .class.)
+  )
   p <- p + ggplot2::guides(
     colour = ggplot2::guide_legend("Class"),
     fill = ggplot2::guide_legend("Class")
@@ -107,7 +112,9 @@ autoplot.spatial_rsplit <- function(object, ..., alpha = 0.6) {
 autoplot.spatial_block_cv <- function(object, show_grid = TRUE, ..., alpha = 0.6) {
   p <- autoplot.spatial_rset(object, ..., alpha = alpha)
 
-  if (!show_grid) return(p)
+  if (!show_grid) {
+    return(p)
+  }
 
   data <- object$splits[[1]]$data
 
@@ -136,5 +143,4 @@ autoplot.spatial_block_cv <- function(object, show_grid = TRUE, ..., alpha = 0.6
   # Always prints with "Coordinate system already present. Adding new coordinate system, which will replace the existing one."
   # So this silences that
   suppressMessages(p + ggplot2::geom_sf(data = grid_blocks, fill = NA))
-
 }

@@ -25,7 +25,7 @@ ames_sf <- sf::st_as_sf(
 )
 
 ## ---- eval = FALSE------------------------------------------------------------
-#  log10(Sale_Price) ~ Year_Built + Gr_Liv_Area +  Bldg_Type
+#  log10(Sale_Price) ~ Year_Built + Gr_Liv_Area + Bldg_Type
 
 ## -----------------------------------------------------------------------------
 library(spatialsample)
@@ -46,7 +46,7 @@ autoplot(block_folds)
 
 ## -----------------------------------------------------------------------------
 set.seed(123)
-location_folds <- 
+location_folds <-
   spatial_leave_location_out_cv(
     ames_sf,
     group = Neighborhood,
@@ -60,7 +60,7 @@ cluster_folds$type <- "cluster"
 block_folds$type <- "block"
 location_folds$type <- "location"
 
-resamples <- 
+resamples <-
   dplyr::bind_rows(
     cluster_folds,
     block_folds,
@@ -71,20 +71,21 @@ resamples <-
 # `splits` will be the `rsplit` object
 compute_preds <- function(splits) {
   # fit the model to the analysis set
-  mod <- lm(log10(Sale_Price) ~ Year_Built + Bldg_Type * log10(Gr_Liv_Area), 
-            data = analysis(splits))
+  mod <- lm(log10(Sale_Price) ~ Year_Built + Bldg_Type * log10(Gr_Liv_Area),
+    data = analysis(splits)
+  )
   # identify the assessment set
   holdout <- assessment(splits)
   # return the assessment set, with true and predicted price
   tibble::tibble(
     geometry = holdout$geometry,
-    Sale_Price = log10(holdout$Sale_Price), 
+    Sale_Price = log10(holdout$Sale_Price),
     .pred = predict(mod, holdout)
   )
 }
 
 ## -----------------------------------------------------------------------------
-compute_preds(cluster_folds$splits[[7]]) 
+compute_preds(cluster_folds$splits[[7]])
 
 ## -----------------------------------------------------------------------------
 library(purrr)
@@ -110,9 +111,9 @@ library(ggplot2)
 cv_res %>%
   unnest(.preds) %>%
   left_join(cv_rmse, by = c("id", "type")) %>%
-  ggplot(aes(color = .estimate)) + 
+  ggplot(aes(color = .estimate)) +
   geom_sf(aes(geometry = geometry), alpha = 0.5) +
   labs(color = "RMSE") +
-  scale_color_viridis_c() + 
+  scale_color_viridis_c() +
   facet_wrap(vars(type), ncol = 1)
 

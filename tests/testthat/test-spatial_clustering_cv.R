@@ -212,7 +212,6 @@ test_that("polygons are only assigned one fold", {
     }
   )
   expect_true(all(good_holdout))
-
 })
 
 test_that("printing", {
@@ -231,7 +230,7 @@ test_that("printing", {
 test_that("rsplit labels", {
   skip_if_not(sf::sf_use_s2())
   rs <- spatial_clustering_cv(Smithsonian_sf, v = 2)
-  all_labs <- map_df(rs$splits, labels)
+  all_labs <- dplyr::bind_rows(purrr::map(rs$splits, labels))
   original_id <- rs[, grepl("^id", names(rs))]
   expect_equal(all_labs, original_id)
 })

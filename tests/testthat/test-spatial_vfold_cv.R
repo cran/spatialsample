@@ -79,8 +79,6 @@ test_that("spatial_buffer_vfold_cv", {
     }
   )
   expect_true(all(good_holdout))
-
-
 })
 
 test_that("spatial_leave_location_out_cv", {
@@ -90,8 +88,10 @@ test_that("spatial_leave_location_out_cv", {
   sizes1 <- dim_rset(rs1)
 
   set.seed(11)
-  rs2 <- rsample::group_vfold_cv(ames_sf,
-                                 tidyselect::eval_select("Neighborhood", ames_sf))
+  rs2 <- rsample::group_vfold_cv(
+    ames_sf,
+    tidyselect::eval_select("Neighborhood", ames_sf)
+  )
   expect_identical(
     purrr::map(rs1$splits, purrr::pluck, "in_id"),
     purrr::map(rs2$splits, purrr::pluck, "in_id")
@@ -143,7 +143,6 @@ test_that("spatial_leave_location_out_cv", {
   )
   skip_if_not(getRversion() >= numeric_version("3.6.0"))
   expect_snapshot(rs1)
-
 })
 
 test_that("bad args", {
@@ -221,7 +220,6 @@ test_that("bad args", {
       repeats = 2
     )
   )
-
 })
 
 test_that("printing", {
@@ -238,13 +236,13 @@ test_that("rsplit labels", {
   skip_if_not(sf::sf_use_s2())
   set.seed(123)
   rs <- spatial_buffer_vfold_cv(ames_sf, v = 2, buffer = NULL, radius = NULL)
-  all_labs <- map_df(rs$splits, labels)
+  all_labs <- dplyr::bind_rows(purrr::map(rs$splits, labels))
   original_id <- rs[, grepl("^id", names(rs))]
   expect_equal(all_labs, original_id)
 
   set.seed(123)
   rs <- spatial_leave_location_out_cv(ames_sf, Neighborhood, v = 2)
-  all_labs <- map_df(rs$splits, labels)
+  all_labs <- dplyr::bind_rows(purrr::map(rs$splits, labels))
   original_id <- rs[, grepl("^id", names(rs))]
   expect_equal(all_labs, original_id)
 })

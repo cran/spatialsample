@@ -122,7 +122,6 @@ test_that("systematic assignment -- snake", {
   )
   expect_snapshot(boston_snake)
   expect_snapshot(as.integer(boston_snake$splits[[1]]))
-
 })
 
 test_that("systematic assignment -- continuous", {
@@ -207,7 +206,6 @@ test_that("polygons are only assigned one fold", {
     }
   )
   expect_true(all(good_holdout))
-
 })
 
 test_that("blocks are filtered based on centroids", {
@@ -282,7 +280,6 @@ test_that("bad args", {
   expect_snapshot_error(
     spatial_block_cv(boston_canopy, method = "snake", repeats = 2)
   )
-
 })
 
 test_that("printing", {
@@ -299,7 +296,7 @@ test_that("rsplit labels", {
   skip_if_not(sf::sf_use_s2())
   set.seed(123)
   rs <- spatial_block_cv(ames_sf, v = 2)
-  all_labs <- map_df(rs$splits, labels)
+  all_labs <- dplyr::bind_rows(purrr::map(rs$splits, labels))
   original_id <- rs[, grepl("^id", names(rs))]
   expect_equal(all_labs, original_id)
 })
