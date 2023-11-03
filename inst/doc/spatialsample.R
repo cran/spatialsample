@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -7,7 +7,7 @@ knitr::opts_chunk$set(
   eval = requireNamespace("gifski", quietly = TRUE) && requireNamespace("modeldata", quietly = TRUE) && sf::sf_use_s2()
 )
 
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 library(ggplot2)
 theme_set(theme_minimal())
 
@@ -24,7 +24,7 @@ ames_sf <- sf::st_as_sf(
   crs = 4326
 )
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  log10(Sale_Price) ~ Year_Built + Gr_Liv_Area + Bldg_Type
 
 ## -----------------------------------------------------------------------------

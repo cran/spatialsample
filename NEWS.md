@@ -1,3 +1,30 @@
+# spatialsample 0.5.0
+
+* `spatial_block_cv()` gains an argument, `expand_bbox`, which represents the 
+  proportion a bounding box should be expanded by (each corner of the bounding
+  box is expanded by `bbox_corner_value * expand_bbox`). 
+  * **This is a breaking change** for data in planar coordinate reference 
+    systems. Set to 0 to obtain previous behaviors. 
+  * Data in geographic coordinates was already having its bounding box expanded 
+    by the default 0.00001. 
+  * This makes it so that regularly spaced data is less likely to fall precisely 
+    along grid lines (and therefore fall into two assessment sets) and so that 
+    geographic data falls is more likely to fall within the constructed grid.
+  * Thanks to Nikos on StackOverflow for reporting this behavior:
+    https://stackoverflow.com/q/77374348/9625040
+    
+* `spatial_block_cv()` will now throw an error if observations are in multiple
+  assessment folds (caused by observations, or observation centroids, falling 
+  precisely along grid polygon boundaries).
+
+* In `spatial_nndm_cv()`, passing a single polygon (or multipolygon) to the 
+  `prediction_sites` argument will result in prediction sites being sampled from 
+  that polygon, rather than from its bounding box.
+
+* `get_rsplit()` is now re-exported from the rsample package. This provides a 
+  more natural, pipe-able interface for accessing individual splits; 
+  `get_rsplit(rset, 1)` is identical to `rset$splits[[1]]`.
+
 # spatialsample 0.4.0
 
 * `spatial_nndm_cv()` is a new function for nearest neighbor distance matching
