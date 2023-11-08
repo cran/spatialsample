@@ -1,3 +1,11 @@
+# spatialsample 0.5.1
+
+* `spatial_block_cv()` now adds an `expand_bbox` attribute to the resulting rset
+  for compatibility with `rsample::reshuffle_rset()`
+  
+* `autoplot.spatial_block_cv()` now plots the proper grid (using the new 
+  `expand_bbox` attribute).
+
 # spatialsample 0.5.0
 
 * `spatial_block_cv()` gains an argument, `expand_bbox`, which represents the 
