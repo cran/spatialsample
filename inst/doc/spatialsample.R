@@ -25,7 +25,7 @@ ames_sf <- sf::st_as_sf(
 )
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  log10(Sale_Price) ~ Year_Built + Gr_Liv_Area + Bldg_Type
+# log10(Sale_Price) ~ Year_Built + Gr_Liv_Area + Bldg_Type
 
 ## -----------------------------------------------------------------------------
 library(spatialsample)

@@ -1,3 +1,7 @@
+# spatialsample 0.6.1
+
+* Minor update to follow update in rsample and testthat. No user-facing impacts.
+
 # spatialsample 0.6.0
 
 * Fixed bug where passing a polygon to `spatial_nndm_cv()` forced leave-one-out
